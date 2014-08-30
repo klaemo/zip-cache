@@ -6,10 +6,13 @@ var db = {
   'id-2': { 'foo': 2 }
 }
 
-var cache = Cache(function (key, cb) {
-  // fake slow database
-  setTimeout(function () { cb(null, db[key]) }, 100)
-}, { max: 2 })
+var cache = Cache({
+  load: function (key, cb) {
+    // fake slow database
+    setTimeout(function () { cb(null, db[key]) }, 100)
+  },
+  max: 2
+})
 
 test('.get(key, cb)', function (t) {
   t.plan(6)

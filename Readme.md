@@ -2,36 +2,49 @@
 [![Build Status](https://travis-ci.org/klaemo/zip-cache.svg)](https://travis-ci.org/klaemo/zip-cache)
 [![NPM](https://nodei.co/npm/zip-cache.png)](https://nodei.co/npm/zip-cache/)
 
-Cache your async lookups and store them compressed in memory.
-This module is just a light wrapper around [isaacs/async-cache](https://github.com/isaacs/async-cache).
+Cache your async lookups and store them (gzip) compressed in memory.
+This module is just a light wrapper around [isaacs/async-cache](https://github.com/isaacs/async-cache),
+even this Readme ;-)
 
 ## Installation
 
     npm install zip-cache
 
 
-## Usage
+## Example
 
-```js
-var Cache = require('zip-cache')
+Let's say you have to look up JSON from a databse. But you are ok
+with only looking up the info once every 10 minutes (since it
+doesn't change that often), and you want to limit your cache size to
+1000 objects. The objects will be held as gzipped buffers in memory to 
+take up less space. This might be silly for some cases, but could save
+precious memory on cheap VPSs.
 
-var cache = Cache(function (key, cb) {
-  // fetch your stuff asynchronously
-  setTimeout(function () { cb(null, { 'my': 'item' }) }, 200)
-}, options)
+You can do this:
 
-cache.get(key, function (err, item) {
-  //-> item === { 'my': 'item' }
+```javascript
+var cache = new AsyncCache({
+  // options passed directly to the internal lru cache
+  max: 1000,
+  maxAge: 1000 * 60 * 10,
+  // method to load a thing if it's not in the cache.
+  // key must be unique in the context of this cache.
+  load: function (key, cb) {
+    // this method will only be called if it's not already in cache, and will
+    // cache the result in the lru.
+    getTheStatFromTheKey(key, cb)
+  }
+})
+
+// then later..
+cache.get('key', function (er, item) {
+  // maybe loaded from cache, maybe just fetched
 })
 ```
 
-### Arguments
+Except for the `load` method, all the options are passed unmolested to
+the internal [lru-cache](http://npm.im/lru-cache).
 
-`Cache(fn, options)`
-
-* `fn(key, callback)` This function will be called when the item is not in the cache
-* `options` (optional) object of options that will be passed through to the 
-  underlying [LRU cache](https://github.com/isaacs/lru-cache) 
 
 ## Methods
 

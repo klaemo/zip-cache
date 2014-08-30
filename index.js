@@ -1,14 +1,20 @@
 var Cache = require('async-cache')
 var zlib = require('zlib')
 
-module.exports = function (fetch, opts) {
+module.exports = function (opts) {
   // options passed directly to the internal lru cache
   opts = opts || {}
 
+  if (!opts.load || typeof opts.load != 'function') {
+    throw new Error('need load function')
+  }
+  
+  opts._load = opts.load
+  
   opts.load = function (key, cb) {
     // this method will only be called if it's not already in cache, and will
     // cache the result in the lru.
-    fetch(key, function (err, item) {
+    opts._load(key, function (err, item) {
       if (err) return cb(err)
       
       try {

@@ -13,12 +13,13 @@ even this Readme ;-)
 
 ## Example
 
-Let's say you have to look up JSON from a databse. But you are ok
+Let's say you have to look up JSON from a database. But you are ok
 with only looking up the info once every 10 minutes (since it
 doesn't change that often), and you want to limit your cache size to
-1000 objects. The objects will be held as gzipped buffers in memory to 
-take up less space. This might be silly for some cases, but could save
-precious memory on cheap VPSs.
+1000 objects. The objects will be held as gzipped buffers in memory.
+This might be silly for some cases, but could save precious memory on cheap VPSs.
+
+__Note:__ Currently zip-cache only handles `JSON.stringify`able objects.
 
 You can do this:
 
@@ -32,7 +33,7 @@ var cache = new AsyncCache({
   load: function (key, cb) {
     // this method will only be called if it's not already in cache, and will
     // cache the result in the lru.
-    getTheStatFromTheKey(key, cb)
+    getTheJsonFromYourDB(key, cb)
   }
 })
 
